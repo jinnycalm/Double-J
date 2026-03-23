@@ -4,15 +4,15 @@ import './App.css';
 
 // 카카오에서 제공하는 카테고리
 const CATEGORIES = [
-    { id: 'FD6', name: '음식점', color: '#ff6699' },
-    { id: 'CE7', name: '카페', color: '#8d6e63' },
-    { id: 'CS2', name: '편의점', color: '#ff9e0f' },
-    { id: 'HP8', name: '병원', color: '#e57373' },
-    { id: 'PM9', name: '약국', color: '#4db6ac' },
-    { id: 'MT1', name: '대형마트', color: '#f55354' },
-    { id: 'AC5', name: '학원', color: '#99cc00' },
-    { id: 'PK6', name: '주차장', color: '#0099cc' },
-    { id: 'OL7', name: '주유소/충전소', color: '#003399' },
+    { id: 'FD6', name: '음식점', imgSrc: '/icons/restaurant.png' },
+    { id: 'CE7', name: '카페', imgSrc: '/icons/coffee.png' },
+    { id: 'CS2', name: '편의점', imgSrc: '/icons/convenience.png' },
+    { id: 'HP8', name: '병원', imgSrc: '/icons/hospital.png' },
+    { id: 'PM9', name: '약국', imgSrc: '/icons/pharmacy.png' },
+    { id: 'MT1', name: '대형마트', imgSrc: '/icons/mart.png' },
+    { id: 'AC5', name: '학원', imgSrc: '/icons/education.png' },
+    { id: 'PK6', name: '주차장', imgSrc: '/icons/parking.png' },
+    { id: 'OL7', name: '주유소/충전소', imgSrc: '/icons/fuel.png' },
 ];
 
 function MapPage() {
@@ -133,17 +133,18 @@ function MapPage() {
 
   // 커스텀 이미지 마커 생성 및 클릭 이벤트 추가
   const addMarker = (place) => {
-    const cat = CATEGORIES.find(c => c.id === place.category_group_code) || { color: '#3182f6' };
-    
-    // 각 카테고리 색상을 입힌 SVG 데이터 URI 생성
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="40" viewBox="0 0 28 40"><path fill="${cat.color}" stroke="#ffffff" stroke-width="1.5" d="M14 0C6.268 0 0 6.268 0 14c0 10 14 26 14 26s14-16 14-26c0-7.732-6.268-14-14-14z"/><circle cx="14" cy="14" r="6" fill="#ffffff"/></svg>`;
-    const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-    const imageSize = new window.kakao.maps.Size(28, 40);
-    const markerImage = new window.kakao.maps.MarkerImage(url, imageSize, { offset: new window.kakao.maps.Point(14, 40) });
+      const cat = CATEGORIES.find(c => c.id == place.category_group_code) || null;
+      let markerImage = null;
+
+    if (cat) {
+        var imgSrc = cat.imgSrc;
+        var imageSize = new window.kakao.maps.Size(45, 63);
+        markerImage = new window.kakao.maps.MarkerImage(imgSrc, imageSize, { offset: new window.kakao.maps.Point(14, 40) });
+    }
 
     const marker = new window.kakao.maps.Marker({
-      position: new window.kakao.maps.LatLng(place.y, place.x),
-      image: markerImage
+        position: new window.kakao.maps.LatLng(place.y, place.x),
+        image: markerImage
     });
 
     marker.setMap(mapRef.current);
