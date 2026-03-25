@@ -2,7 +2,9 @@ import os
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings      # 자동 형변환 및 타입 안정성 자동 검증
 
-load_dotenv()
+# 상위 폴더에 있는 .env 파일을 강제로 읽어오도록 경로 지정
+env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
+load_dotenv(dotenv_path=env_path)
 
 class Settings(BaseSettings):
     # OPEN AI KEY
