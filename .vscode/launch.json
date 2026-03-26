@@ -7,13 +7,13 @@
       "request": "launch",
       "module": "uvicorn",
       "args": [
-        "server.main:app",
+        "main:app",
         "--reload",
         "--port",
         "8000"
       ],
       "env": {
-        "PYTHONPATH": "${workspaceFolder}"
+        "envPath": "${workspaceFolder}"
       },
       "cwd": "${workspaceFolder}/server",
       "jinja": true,

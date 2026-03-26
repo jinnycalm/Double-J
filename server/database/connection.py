@@ -1,13 +1,6 @@
-import os
-import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from dotenv import load_dotenv
 from sshtunnel import SSHTunnelForwarder
 import psycopg2
 from config import settings
-
-load_dotenv()
 
 # DB class
 class RemoteDBConnection:
@@ -20,10 +13,10 @@ class RemoteDBConnection:
         '''SSH Tunnel 생성 및 DB 연결'''
         try:
             self.tunnel = SSHTunnelForwarder(
-                (settings.SSH_HOST, settings.SSH_PORT),
-                ssh_username=settings.SSH_USER,
-                ssh_pkey=settings.SSH_KEY_PATH,
-                remote_bind_address=(settings.RDS_HOST, settings.RDS_PORT)
+                (self.config.SSH_HOST, self.config.SSH_PORT),
+                ssh_username=self.config.SSH_USER,
+                ssh_pkey=self.config.SSH_KEY_PATH,
+                remote_bind_address=(self.config.RDS_HOST, self.config.RDS_PORT)
             )
             self.tunnel.start()
             print('SSH 터널 생성 완료')
@@ -31,11 +24,11 @@ class RemoteDBConnection:
             self.connection = psycopg2.connect(
                 host='127.0.0.1',
                 port=self.tunnel.local_bind_port,
-                user=settings.RDS_USER,
-                database=settings.RDS_DB_NAME,
-                password=settings.RDS_PASSWORD,
+                user=self.config.RDS_USER,
+                database=self.config.RDS_DB_NAME,
+                password=self.config.RDS_PASSWORD,
             )
-
+            print('DB 연결 시작')
             return self.connection        # with 구문에서 사용할 connection 객체 반환
 
         except Exception as e:
@@ -53,17 +46,20 @@ class RemoteDBConnection:
             print('SSH 터널 종료')
 
 
-def call_users(conn):
-    '''users 테이블 조회'''
-    with conn.cursor() as cur:
-        cur.execute('select * from "Users";')
-        result = cur.fetchone()
-        return print(f'결과: {result}')
-
-
-if __name__ == '__main__':
+def get_db_conn(): 
+    '''새로운 DB 연결 생성 및 자동 종료'''
     try:
         with RemoteDBConnection(settings) as conn:
-            result = call_users(conn)
+            yield conn                  # 제너레이터로 상태 유지 및 값을 순차적으로 반환
     except Exception as e:
         print(f'DB 연결 실패 : {e}')
+
+
+# 테스트용
+def call_benefits(conn, query):
+    '''LLM이 생성한 query 실행'''
+    with conn.cursor() as cur:
+        cur.execute(query)
+
+        results = [cur.fetchone() for _ in range(3)]
+        return results

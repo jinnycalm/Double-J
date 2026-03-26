@@ -177,10 +177,27 @@ function MapPage() {
     `;
 
     // 혜택 확인 버튼 클릭 이벤트 (리액트 방식이 아닌 DOM 이벤트 연결)
-    content.querySelector('.btn-check-benefit').onclick = () => {
+    content.querySelector('.btn-check-benefit').onclick = async () => {
       setAnalyzingPlace(place);
-      // 약 1.5초 후 혜택 확인 페이지로 이동 (카드 정보 RAG 처리를 위해)
-      setTimeout(() => navigate('/benefit', { state: { place } }), 1500);
+      try {
+        // 백엔드로 장소 정보 전송 및 혜택 분석 요청
+        const response = await fetch('http://localhost:8000/api/benefits/analyze', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(place),
+        });
+        const analysisResult = await response.json();
+        
+        // 분석 결과와 함께 혜택 페이지로 이동
+        navigate('/benefit', { state: { place, analysisResult } });
+      } 
+      catch (error) {
+        console.error('혜택 정보 분석 중 오류 발생:', error);
+        // 오류 발생 시에도 기본 정보만 가지고 이동
+        navigate('/benefit', { state: { place } });
+      }
     };
 
     const overlay = new window.kakao.maps.CustomOverlay({
