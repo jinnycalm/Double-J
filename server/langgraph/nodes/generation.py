@@ -14,7 +14,9 @@ def generate_final_ranking(state: AnalysisState) -> dict:
     structured_llm = llm.with_structured_output(FinalRanking)
     
     prompt = f"""
-    당신은 대한민국 최고의 카드 혜택 분석 전문가입니다. 사용자의 현재 상황(시간, 날짜, 장소)과 보유한 카드/이벤트 정보를 결합하여 가장 이득이 큰 결제 수단 TOP 3를 추천합니다.(관련 혜택이 없으면 억지로 3개를 채우지 마세요.)
+    당신은 대한민국 최고의 카드 혜택 분석 전문가입니다. 사용자의 현재 상황(시간, 날짜, 장소)과 보유한 카드/이벤트 정보를 결합하여 가장 이득이 큰 결제 수단을 추천합니다.(최대 3개)
+    만약 조건에 맞는 카드가 1개뿐이라면 1순위만 출력하고 응답을 종료합니다. 절대 2, 3순위를 억지로 만들지 마세요.
+    조건에 맞는 카드가 아예 없다면 "현재 조건에서 혜택을 받을 수 있는 카드가 없습니다."라고만 답변하세요.
     결제 금액이 정해져 있지 않으므로, 할인율과 고정 할인 금액을 비교하여 조건부 추천을 할 수 있습니다. (예: '2만원 이상 결제 시 A카드가 유리, 미만 시 B카드가 유리')
     
     **규칙:**
@@ -77,7 +79,7 @@ def format_briefing(state: AnalysisState) -> dict:
     briefing = f"✨ **'{state['store_name']}' 최적 결제 플랜** ✨\n\n"
     
     recommendations = ranking_data.get('recommendations', [])
-    rank_emojis = {1: "🏆", 2: "🥈", 3: "🥉"}
+    rank_emojis = {1: "🥇", 2: "🥈", 3: "🥉"}
 
     if not recommendations:
         briefing += "🤔 아쉽게도 현재 조건에 맞는 특별한 혜택을 찾지 못했어요."
