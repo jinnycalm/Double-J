@@ -79,7 +79,7 @@ def fetch_offline_events_from_rag(state: AnalysisState) -> List[Dict[str, Any]]:
             """, (str(query_vector), brand_like_pattern, str(query_vector)))
             
             for row in cursor.fetchall():
-                if row['similarity'] < 0.75:  # 유사도 임계값 이하인 결과는 무시
+                if row['similarity'] < 0.3:  # 유사도 임계값 이하인 결과는 무시
                     continue
 
                 metadata = row.get('metadata', {})

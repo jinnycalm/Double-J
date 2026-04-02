@@ -147,7 +147,7 @@ def valid_benefit(card: Dict[str, Any], store_category_code: str, store_name: st
 
     return found_benefits
 
-def cross_check_with_rag(card: Dict[str, Any], store_name: str, store_category_code: str) -> Dict[str, Any]:
+def cross_check_with_rag(card: Dict[str, Any], store_name: str, store_category_code: str, current_datetime: str) -> Dict[str, Any]:
     """pgvector를 이용해 혜택과 주의사항을 RAG로 교차 검증"""
     benefits_json = card.get("benefits_json", {})
     critical_warning = benefits_json.get("critical_warning", "특별한 주의사항 없음.")
@@ -174,7 +174,7 @@ def cross_check_with_rag(card: Dict[str, Any], store_name: str, store_category_c
     # 1. 임베딩 모델 초기화 및 쿼리 벡터 생성
     try:
         embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
-        query_text = f"카드명: {card.get('card_name')} | 내용: {embedding_category} 매장 ({store_name}) 혜택 조건, 실적 제외, 주요 유의사항"
+        query_text = f"카드명: {card.get('card_name')} | 내용: {embedding_category} 매장 ({store_name}) 혜택 조건, 실적 제외, 주요 유의사항 | 현재 시간: {current_datetime}"
         query_vector = embeddings.embed_query(query_text)
     
     except Exception as e:
@@ -299,7 +299,7 @@ def consolidate_analysis(state: AnalysisState) -> dict:
         applicable_benefits = valid_benefit(card, state["store_category"], state["store_name"])
         
         # 2. RAG를 통한 교차 검증
-        rag_check = cross_check_with_rag(card, state["store_name"], state["store_category"])
+        rag_check = cross_check_with_rag(card, state["store_name"], state["store_category"], state["current_datetime"])
         
         # 3. DB에서 실시간 한도 조회
         valid_applicable_benefits = check_benefit_limits(card['user_card_id'], card['card_name'], applicable_benefits)

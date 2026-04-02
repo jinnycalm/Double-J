@@ -21,15 +21,15 @@ class Recommendation(BaseModel):
     """LLM이 생성하는 개별 추천 항목 모델"""
     rank: int = Field(description="혜택 순위")
     payment_method: str = Field(description="추천하는 결제 수단 이름 (예: 'KB 토심이 카드' 또는 '네이버페이 현장결제')")
-    benefit_description: str = Field(description="예상 혜택에 대한 설명. 금액이 특정되지 않을 경우, 할인율이나 조건을 명시. 예: '10% 할인', '2만원 이상 결제 시 20% 할인이 2000원 할인보다 유리'")
-    positive_reason: str = Field(description="이 결제 수단을 추천하는 긍정적인 이유")
-    critical_review: str = Field(description="놓칠 수 있는 단점이나 주의사항 (비판적 전략). 예를 들어, '이 혜택을 받으면 실적에서 제외됩니다.' 또는 '다른 혜택과 중복 적용되지 않습니다.' 등. 단점이 없다면 '특별한 단점 없음'으로 명시.")
-    evidence: str = Field(description="이 추천의 근거가 된 데이터나 분석 내용 요약")
+    benefit_description: str = Field(description="핵심 혜택을 25자 이내 한 줄로 요약. 금액이 특정되지 않을 경우, 할인율이나 조건을 명시. 예: '10% 할인', '2만원 이상 결제 시 20% 할인이 2000원 할인보다 유리'")
+    positive_reason: str = Field(description="추천 이유를 문장이 아닌 키워드 형태로 작성 (예: 할인율 최고, 주말 추가 혜택)")
+    critical_review: str = Field(description="놓칠 수 있는 단점이나 주의사항 (비판적 전략)을 키워드 형태로 작성 (예: 혜택 받을 시 실적에서 제외, 중복 적용 불가 등). 단점이 없다면 '특별한 단점 없음'으로 명시.")
+    evidence: str = Field(description="이 추천의 근거가 된 데이터나 분석 내용 1~2문장 이내 요약")
 
 class FinalRanking(BaseModel):
     """LLM의 최종 판단 결과를 구조화하는 최상위 모델 (generate_final_ranking 노드의 출력)"""
     recommendations: List[Recommendation] = Field(description="순위화된 추천 목록 (최대 3개)")
-    summary: str = Field(description="사용자를 위한 최종 요약 및 조언")
+    summary: str = Field(description="사용자를 위한 최종 요약 및 조언. 반드시 2줄 이내로 핵심만 작성")
 
 
 # --- State 정의 ---
@@ -39,6 +39,7 @@ class AnalysisState(TypedDict):
     user_id: str
     store_name: str # location_name과 동일
     store_category: str # raw_category와 동일 (카카오 API 원본 문자열)
+    current_datetime: str # 분석 요청이 들어온 현재 시간 (미리 포맷팅된 문자열)
 
     # --- 중간 데이터 (Intermediate Data) ---
     # 1. DB에서 조회한 사용자의 카드 후보 목록 (search_user_cards 노드 결과)

@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from server.models.map import MapInfo
+from datetime import datetime
 from server.langgraph.graph import create_benefit_analysis_graph
 from server.langgraph.models import AnalysisState
 
@@ -16,6 +17,7 @@ async def analyze_benefit(place: MapInfo):
         user_id="1",  # 임시 사용자 ID
         store_name=place.get('place_name'),
         store_category=place.get('category_group_code'), # 카카오 API의 카테고리 코드를 사용
+        current_datetime=datetime.now().strftime('%Y-%m-%d %A %H:%M')
     )
     
     final_state = benefit_analysis_graph.invoke(initial_state)
